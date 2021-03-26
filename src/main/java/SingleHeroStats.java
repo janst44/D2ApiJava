@@ -1,3 +1,6 @@
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -35,34 +38,34 @@ public class SingleHeroStats {
         }
     }
 
-    public double getTotalWinRate() {
-        int winCount = 0;
-        int lossCount = 0;
-        for (WinLossTotals winLossTotals : opponents.values())  {
-            winCount += winLossTotals.wins;
-            lossCount += winLossTotals.losses;
-        }
-        return (double) winCount/(winCount + lossCount);
-    }
-
-    public int getTotalGamesPlayed() {
-        int numGamesPlayed = 0;
-        for (WinLossTotals winLossTotals : opponents.values())  {
-            numGamesPlayed += winLossTotals.getTotalNumGames();
-        }
-        return numGamesPlayed;
-    }
-
-    public double getTotalWinRateByOpponentByUnit() {
-        int winCount = 0;
-        int lossCount = 0;
-        for (WinLossTotals winLossTotals : opponents.values())  {
-            if(winLossTotals.getWinRate() > .5)
-            {
-                winCount++;
-            }
-            lossCount++;
-        }
-        return (double) winCount/(winCount + lossCount);
-    }
+//    public double getTotalWinRateAsThisHero() {
+//        int winCount = 0;
+//        int lossCount = 0;
+//        for (WinLossTotals winLossTotals : opponents.values())  {
+//            winCount += winLossTotals.wins;
+//            lossCount += winLossTotals.losses;
+//        }
+//        return (double) winCount/(winCount + lossCount);
+//    }
+//
+//    public int getTotalGamesPlayedAsThisHero() {
+//        int numGamesPlayed = 0;
+//        for (WinLossTotals winLossTotals : opponents.values())  {
+//            numGamesPlayed += winLossTotals.getTotalNumGames();
+//        }
+//        return numGamesPlayed;
+//    }
+//
+//    public double getTotalWinRateByOpponentByUnitAsThisHero() {
+//        int winCount = 0;
+//        int lossCount = 0;
+//        for (WinLossTotals winLossTotals : opponents.values())  {
+//            if(winLossTotals.getWinRate() > .5)
+//            {
+//                winCount++;
+//            }
+//            lossCount++;
+//        }
+//        return (double) winCount/(winCount + lossCount);
+//    }
 }

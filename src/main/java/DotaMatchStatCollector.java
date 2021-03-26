@@ -9,6 +9,9 @@ import static java.lang.Math.abs;
 
 public class DotaMatchStatCollector {
 
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_RED = "\u001B[31m";
+
     private AllHeroStats allHeroStats;
     private Map<String, String> heroes;
     private static final int MATCHES_BATCH_SIZE = 100; // seems like 100 every 10 seconds is good because sometimes I get less
@@ -43,12 +46,20 @@ public class DotaMatchStatCollector {
                 continue;
             }
             saveEvery100Requests +=1;
+            int numSuccessful = 0;
             for (int i = 0; i < matches.length(); i++) {
                 JSONObject match = matches.getJSONObject(i);
-                saveMatchStatistics(allHeroStats, match);
+                boolean saved = saveMatchStatistics(allHeroStats, match);
+                if(saved) {
+                    numSuccessful++;
+                }
             }
             lastSequenceNumber = matches.getJSONObject(matches.length()-1).get("match_seq_num").toString();
-            System.out.println("Batch of " + matches.length() + " saved successfully");
+            if(numSuccessful != matches.length()) {
+                System.out.println(ANSI_RED + numSuccessful + ANSI_RESET + " in batch of " + matches.length() + " saved successfully");
+            } else{
+                System.out.println(numSuccessful + " in batch of " + matches.length() + " saved successfully");
+            }
             getSignificantVisualData();
 
             if(saveEvery100Requests == 100) {
@@ -111,7 +122,7 @@ public class DotaMatchStatCollector {
         return mostRecentGame.getJSONArray("matches");
     }
 
-    private void saveMatchStatistics(AllHeroStats allHeroStats, JSONObject match) {
+    private boolean saveMatchStatistics(AllHeroStats allHeroStats, JSONObject match) {
         try {
             JSONArray players = match.getJSONArray("players");
             String outcome = match.get("radiant_win").toString();
@@ -126,6 +137,9 @@ public class DotaMatchStatCollector {
             for (int i = 0; i < players.length(); i++) {
                 JSONObject innerObj = players.getJSONObject((i));//a single player
                 String hero_id = innerObj.get("hero_id").toString();
+                if(hero_id.equals("0")) {
+                    break;
+                }
                 String player_slot = innerObj.get("player_slot").toString();
                 boolean won = false;
                 if ((Integer.parseInt(player_slot) < 10 && radiant_win) || (Integer.parseInt(player_slot) > 100 && !radiant_win)) {
@@ -139,6 +153,7 @@ public class DotaMatchStatCollector {
                     allHeroStats.add(heroes.get(hero_id), heroes.get(players.getJSONObject((j)).get("hero_id").toString()), won);
                 }
             }
+            return true;
         } catch (Exception e) {
             try {
                 System.out.println("Unable to save match_id: " + match.get("match_id"));
@@ -148,6 +163,7 @@ public class DotaMatchStatCollector {
             }
             e.printStackTrace();
         }
+        return false;
     }
 
     private void loadDataFromFile() throws IOException {
