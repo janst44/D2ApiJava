@@ -14,7 +14,8 @@ public class DotaMatchStatCollector {
 
     private AllHeroStats allHeroStats;
     private Map<String, String> heroes;
-    private static final int MATCHES_BATCH_SIZE = 100; // seems like 100 every 10 seconds is good because sometimes I get less
+    private static final int MATCHES_BATCH_SIZE = 101; // seems like 100 every 10 seconds is good because sometimes I get less
+    private static final int SAVE_EVERY_X_REQUESTS = 25;
 
     public DotaMatchStatCollector() throws Exception {
         try {
@@ -22,9 +23,10 @@ public class DotaMatchStatCollector {
             System.out.println("HeroStats loaded from file successfully");
         } catch (IOException e) {
             System.out.println("Unable to find file to load. Starting with new HeroStats");
-            this.allHeroStats = new AllHeroStats();
+            allHeroStats = new AllHeroStats();
         }
-        this.heroes = getHeroNameMappings();
+        heroes = getHeroNameMappings();
+        allHeroStats.batchUpdateSingleStats();
     }
 
     public void startReadingFromAPI() throws Exception {
@@ -35,7 +37,7 @@ public class DotaMatchStatCollector {
             e.printStackTrace();
             throw e;
         }
-        int saveEvery100Requests = 0;
+        int saveCounter = 0;
         while(true) {
             JSONArray matches;
             try {
@@ -45,7 +47,7 @@ public class DotaMatchStatCollector {
                 System.out.println("Empty Result!");
                 continue;
             }
-            saveEvery100Requests +=1;
+            saveCounter +=1;
             int numSuccessful = 0;
             for (int i = 0; i < matches.length(); i++) {
                 JSONObject match = matches.getJSONObject(i);
@@ -58,14 +60,14 @@ public class DotaMatchStatCollector {
             if(numSuccessful != matches.length()) {
                 System.out.println(ANSI_RED + numSuccessful + ANSI_RESET + " in batch of " + matches.length() + " saved successfully");
             } else{
-                System.out.println(numSuccessful + " in batch of " + matches.length() + " saved successfully");
+                System.out.println(numSuccessful + " of " + matches.length() + " saved successfully");
             }
-            getSignificantVisualData();
-
-            if(saveEvery100Requests == 100) {
+            if(saveCounter == SAVE_EVERY_X_REQUESTS) {
+                allHeroStats.batchUpdateSingleStats();
                 saveDataToFile(lastSequenceNumber);
-                saveEvery100Requests = 0;
+                saveCounter = 0;
             }
+            getHeroJsonKeepTop5CountersPerHero();
             Thread.sleep(10000); // don't pound the server too fast
         }
     }
@@ -174,22 +176,38 @@ public class DotaMatchStatCollector {
         FileOperations.saveDataToFile(lastSequenceNumber, JsonUtilities.getAllHeroJson(allHeroStats));
     }
 
-    public String getVisualData() {
-        return JsonUtilities.getAllHeroJson(allHeroStats);
-    }
-
-    public String getSignificantVisualData() { // modifies the stats so need to create deep copy
+    private AllHeroStats copyAllHeroData() {
         AllHeroStats allHeroStatsDeepCopy = null;
         try{
             allHeroStatsDeepCopy = JsonUtilities.getAllHeroObj(JsonUtilities.getAllHeroJson(allHeroStats));
         } catch (IOException e) {
             e.printStackTrace();
+            allHeroStatsDeepCopy = null;
         }
         if(allHeroStatsDeepCopy == null) {
             System.out.println("There was an issue copying data for visualization. Empty string returned.");
-            return "";
         }
-        return VisualizeData.getSignificantWinRatesVsOtherHerosJson(allHeroStatsDeepCopy);
+        return allHeroStatsDeepCopy;
+    }
+
+    // TODO: move below methods to controller
+    public String getHeroJsonAlphabetically() {
+        return JsonUtilities.getAllHeroJson(allHeroStats);
+    }
+
+    public String getHeroJsonByUnitWinRate() { // modifies the stats so need to create deep copy
+        AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
+        return VisualizeData.getHerosByUnitWinRate(allHeroStatsDeepCopy, new WinRateByUnitComparator());
+    }
+
+    public String getHeroJsonByAggregateWinRate() { // modifies the stats so need to create deep copy
+        AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
+        return VisualizeData.getHerosByAggregateWinRate(allHeroStatsDeepCopy, new WinRateComparator());
+    }
+
+    public String getHeroJsonKeepTop5CountersPerHero() { // modifies the stats so need to create deep copy
+        AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
+        return VisualizeData.getHerosAlphabeticallyIncludeTop5Counters(allHeroStatsDeepCopy);
     }
 
 }

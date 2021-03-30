@@ -14,6 +14,10 @@ public class AllHeroStats {
     // hero name to stats
     private Map<String, SingleHeroStats> heroStats;
 
+    public void setHeroStats(Map<String, SingleHeroStats> heroStats) {
+        this.heroStats = heroStats;
+    }
+
     //Add new hero or update stats for existing hero
     public void add(String name, String opponentName, boolean win){
         if(heroStats.containsKey(name)){
@@ -22,6 +26,14 @@ public class AllHeroStats {
         else{
             heroStats.put(name, new SingleHeroStats());
             heroStats.get(name).add(opponentName, win);
+        }
+    }
+
+    public void batchUpdateSingleStats() {
+        for (SingleHeroStats singleHeroStats : heroStats.values()) {
+            singleHeroStats.setTotalGamesPlayedAsThisHero();
+            singleHeroStats.setTotalWinRateAsThisHero();
+            singleHeroStats.setTotalWinRateByOpponentByUnitAsThisHero();
         }
     }
 
