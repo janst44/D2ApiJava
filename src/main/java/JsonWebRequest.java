@@ -3,9 +3,11 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.rmi.ServerError;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,17 +23,22 @@ public class JsonWebRequest {
         con.setRequestMethod("GET");
         //add request header
         con.setRequestProperty("User-Agent", "Mozilla/5.0");
-        int responseCode = con.getResponseCode();
         System.out.println("\nSending 'GET' request to URL : " + url);
+        int responseCode = con.getResponseCode();
         System.out.println("Response Code : " + responseCode);
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-        return new JSONObject(response.toString());
+        String response = readInputStream(con.getInputStream());
+        return new JSONObject(response);
     }
+
+    private String readInputStream(final InputStream inputStream) throws IOException {
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        final StringBuilder responseString = new StringBuilder();
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            responseString.append(line);
+        }
+        bufferedReader.close();
+        return responseString.toString();
+    }
+
 }

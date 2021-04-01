@@ -44,7 +44,20 @@ public class DotaMatchStatCollector {
                 matches = getMatchesJsonArray(lastSequenceNumber, MATCHES_BATCH_SIZE);
             } catch(Exception e) {
                 e.printStackTrace();
-                System.out.println("Empty Result!");
+                System.out.println("Getting most recent seq number to restart from to avoid continued errors");
+                lastSequenceNumber = "0";
+                while(lastSequenceNumber == "0") {
+                    try{
+                        lastSequenceNumber = getMostRecentSequenceNumber();
+                    } catch (Exception ex) {
+                        e.printStackTrace();
+                        System.out.println("Upstream server error, waiting for 30 seconds before retrying");
+                        for(int i =1; i < 31; i++){
+                            Thread.sleep(1000); // don't pound the server too fast even when error state
+                            System.out.println(i);
+                        }
+                    }
+                }
                 continue;
             }
             saveCounter +=1;
@@ -67,7 +80,6 @@ public class DotaMatchStatCollector {
                 saveDataToFile(lastSequenceNumber);
                 saveCounter = 0;
             }
-            getHeroJsonKeepTop5CountersPerHero();
             Thread.sleep(10000); // don't pound the server too fast
         }
     }
@@ -108,7 +120,7 @@ public class DotaMatchStatCollector {
         return matchesArray.getJSONObject(0).get("match_seq_num").toString();
     }
 
-    private JSONArray getMatchesJsonArray(String offsetSeqNumber, int batchSize) throws JSONException {
+    private JSONArray getMatchesJsonArray(String offsetSeqNumber, int batchSize) throws JSONException, IOException {
         String url = "http://api.steampowered.com/IDOTA2Match_570/GetMatchHistoryBySequenceNum/v1?key=F4AB12444F7DB98F6462D9CB58656B4E&start_at_match_seq_num=" + offsetSeqNumber + "&matches_requested=" + batchSize;
         JsonWebRequest jsonWebRequest = new JsonWebRequest();
         JSONObject responseObj = null;
@@ -116,6 +128,7 @@ public class DotaMatchStatCollector {
             responseObj = jsonWebRequest.getJsonData(url);
         } catch(Exception e) {
             e.printStackTrace();
+            throw e;
         }
         if(responseObj == null) {
             return new JSONArray();
@@ -140,7 +153,8 @@ public class DotaMatchStatCollector {
                 JSONObject innerObj = players.getJSONObject((i));//a single player
                 String hero_id = innerObj.get("hero_id").toString();
                 if(hero_id.equals("0")) {
-                    break;
+                    System.out.println("hero_id was 0.");
+                    throw new IllegalStateException("hero_id was 0");
                 }
                 String player_slot = innerObj.get("player_slot").toString();
                 boolean won = false;
@@ -151,6 +165,10 @@ public class DotaMatchStatCollector {
                     String player2_slot = players.getJSONObject((j)).get("player_slot").toString();
                     if (abs(Integer.parseInt(player_slot) - Integer.parseInt(player2_slot)) < 100) {
                         continue;
+                    }
+                    if(heroes.get(hero_id) == null || heroes.get(players.getJSONObject((j)).get("hero_id").toString()) == null) {
+                        System.out.println("Hero in game was null, ignoring match data.");
+                        throw new IllegalStateException("Hero in game was null, ignoring match data.");
                     }
                     allHeroStats.add(heroes.get(hero_id), heroes.get(players.getJSONObject((j)).get("hero_id").toString()), won);
                 }
@@ -163,7 +181,6 @@ public class DotaMatchStatCollector {
                 ex.printStackTrace();
                 System.out.println("Encountered match_id that couldn't be parsed");
             }
-            e.printStackTrace();
         }
         return false;
     }
