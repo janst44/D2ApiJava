@@ -26,7 +26,7 @@ public class DotaMatchStatCollector {
             allHeroStats = new AllHeroStats();
         }
         heroes = getHeroNameMappings();
-        allHeroStats.batchUpdateSingleStats();
+        allHeroStats.setAllCalculatedFieldsForSerialization();
     }
 
     public void startReadingFromAPI() throws Exception {
@@ -51,10 +51,10 @@ public class DotaMatchStatCollector {
                         lastSequenceNumber = getMostRecentSequenceNumber();
                     } catch (Exception ex) {
                         e.printStackTrace();
-                        System.out.println("Upstream server error, waiting for 30 seconds before retrying");
-                        for(int i =1; i < 31; i++){
-                            Thread.sleep(1000); // don't pound the server too fast even when error state
-                            System.out.println(i);
+                        System.out.println("Upstream server error, waiting for 1 minute before retrying");
+                        for(int i =1; i < 7; i++){
+                            Thread.sleep(10000); // don't pound the server too fast even when error state
+                            System.out.println(i + "0");
                         }
                     }
                 }
@@ -76,10 +76,11 @@ public class DotaMatchStatCollector {
                 System.out.println(numSuccessful + " of " + matches.length() + " saved successfully");
             }
             if(saveCounter == SAVE_EVERY_X_REQUESTS) {
-                allHeroStats.batchUpdateSingleStats();
+                allHeroStats.setAllCalculatedFieldsForSerialization();
                 saveDataToFile(lastSequenceNumber);
                 saveCounter = 0;
             }
+            getHeroJsonKeepTop5CountersPerHero();
             Thread.sleep(10000); // don't pound the server too fast
         }
     }
@@ -106,7 +107,7 @@ public class DotaMatchStatCollector {
     }
 
     private String getMostRecentSequenceNumber() throws IOException, JSONException {
-        String url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?key=F4AB12444F7DB98F6462D9CB58656B4E&game_mode=1&matches_requested=1";
+        String url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/V001/?key=F4AB12444F7DB98F6462D9CB58656B4E&matches_requested=1";
         JsonWebRequest jsonWebRequest = new JsonWebRequest();
         JSONObject responseObj;
         try {
@@ -139,6 +140,11 @@ public class DotaMatchStatCollector {
 
     private boolean saveMatchStatistics(AllHeroStats allHeroStats, JSONObject match) {
         try {
+            int gameMode = (Integer) match.get("game_mode");
+            int lobbyType = (Integer) match.get("lobby_type");
+            if (!(gameMode == 22) || !(lobbyType == 7)) {
+                return false;
+            }
             JSONArray players = match.getJSONArray("players");
             String outcome = match.get("radiant_win").toString();
             boolean radiant_win;
@@ -226,5 +232,26 @@ public class DotaMatchStatCollector {
         AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
         return VisualizeData.getHerosAlphabeticallyIncludeTop5Counters(allHeroStatsDeepCopy);
     }
+
+    /**
+     * Returns a JSON String representation of the top x heros to pick during the first picking phase
+     * @param numHeros the number of hero's to return
+     * @return a JSON String with the best choice of hero first to the worst being last
+     */
+    public String getBestFirstPickPool(int numHeros) {
+        AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
+        return VisualizeData.getBestFirstPickPool(allHeroStatsDeepCopy, numHeros);
+    }
+
+    public String getBestSecondPickPool() {
+        AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
+        return VisualizeData.getBestSecondPickPool(allHeroStatsDeepCopy);
+    }
+
+    public String getBestFinalPickPool() {
+        AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
+        return VisualizeData.getBestFinalPickPool(allHeroStatsDeepCopy);
+    }
+
 
 }

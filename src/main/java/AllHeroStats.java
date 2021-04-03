@@ -26,11 +26,9 @@ public class AllHeroStats {
         heroStats.get(name).add(opponentName, win);
     }
 
-    public void batchUpdateSingleStats() {
+    public void setAllCalculatedFieldsForSerialization() {
         for (SingleHeroStats singleHeroStats : heroStats.values()) {
-            singleHeroStats.setTotalGamesPlayedAsThisHero();
-            singleHeroStats.setTotalWinRateAsThisHero();
-            singleHeroStats.setTotalWinRateByOpponentByUnitAsThisHero();
+            singleHeroStats.setAllCalculatedFields();
         }
     }
 

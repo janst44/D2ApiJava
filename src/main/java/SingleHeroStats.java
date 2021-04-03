@@ -11,24 +11,44 @@ public class SingleHeroStats {
     private double totalWinRateAsThisHero;
     private int totalGamesPlayed;
     private double totalWinRateByOpponentByUnitAsThisHero;
+    private double popularityScore;
+    private double firstPickRating;
 
     public SingleHeroStats(){
         opponents = new TreeMap<>();
+
         totalWinRateAsThisHero = 0;
         totalGamesPlayed = 0;
         totalWinRateByOpponentByUnitAsThisHero = 0;
+        popularityScore = 0;
+        firstPickRating = 0;
+    }
+
+    // copy constructor
+    public SingleHeroStats(SingleHeroStats singleHeroStats){
+        // dont copy opponents for this constructor
+        this.totalWinRateAsThisHero = singleHeroStats.totalWinRateAsThisHero;
+        this.totalGamesPlayed = singleHeroStats.totalGamesPlayed;
+        this.totalWinRateByOpponentByUnitAsThisHero=singleHeroStats.totalWinRateByOpponentByUnitAsThisHero;
+        this.popularityScore = singleHeroStats.popularityScore;
+        this.firstPickRating = singleHeroStats.firstPickRating;
+    }
+
+    public void setAllCalculatedFields() {
+        this.setTotalWinRateAsThisHero();
+        this.setTotalWinRateByOpponentByUnitAsThisHero();
+        this.setTotalGamesPlayedAsThisHero();
+        this.setPopularityScore();
+        this.setFirstPickRating();
+    }
+
+    // use this method to set opponents in copy
+    public void setOpponentByString(String name, WinLossTotals winLossTotals) {
+        opponents.put(name, winLossTotals);
     }
 
     public Map<String, WinLossTotals> getOpponents() {
         return opponents;
-    }
-
-    public void setOpponents(Map<String, WinLossTotals> opponents) {
-        this.opponents = opponents;
-    }
-
-    public void setOpponentByString(String name, WinLossTotals winLossTotals) {
-        opponents.put(name, winLossTotals);
     }
 
     //Update w/l of an matchup
@@ -92,4 +112,22 @@ public class SingleHeroStats {
         }
         this.totalWinRateByOpponentByUnitAsThisHero = (double) winCount/(winCount + lossCount);
     }
+
+    public double getFirstPickRating() {
+        return firstPickRating;
+    }
+
+    public void setFirstPickRating() {
+
+        this.firstPickRating = firstPickRating;
+    }
+
+    public double getPopularityScore() {
+        return popularityScore;
+    }
+
+    public void setPopularityScore() {
+        this.popularityScore = popularityScore;
+    }
+
 }

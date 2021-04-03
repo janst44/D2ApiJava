@@ -27,14 +27,13 @@ public class VisualizeData {
         while(iterator.hasNext()) {
             Map.Entry<String, SingleHeroStats> entry = iterator.next();
             List<Map.Entry<String, WinLossTotals>> greatest = findGreatest(entry.getValue().getOpponents(), n);
-            SingleHeroStats singleHeroStats = new SingleHeroStats();
+            SingleHeroStats singleHeroStats = new SingleHeroStats(entry.getValue());
             for (Map.Entry<String, WinLossTotals> oneOfTheGreatestCounters : greatest) {
                 singleHeroStats.setOpponentByString(oneOfTheGreatestCounters.getKey(), oneOfTheGreatestCounters.getValue());
             }
             top5Counters.replace(entry.getKey(), singleHeroStats);
         }
         allHeroStats.setHeroStats(top5Counters);
-        allHeroStats.batchUpdateSingleStats(); // needs to calculate computer fields now since we created new SingleHeroStats
         try {
             ObjectMapper objectMapper= new ObjectMapper();
             json = objectMapper.writeValueAsString(allHeroStats);
@@ -43,6 +42,24 @@ public class VisualizeData {
             e.printStackTrace();
         }
         return json;
+    }
+
+    /**
+     * If none of a hero's counters are popular hero's that is good
+     */
+    public static String getBestFirstPickPool(AllHeroStats allHeroStats, int numToGet) {
+
+        return "";
+    }
+
+    public static String getBestSecondPickPool(AllHeroStats allHeroStats) {
+
+        return "";
+    }
+
+    public static String getBestFinalPickPool(AllHeroStats allHeroStats) {
+
+        return "";
     }
 
     private static <K, V extends Comparable<? super V>> List<Map.Entry<K, V>>
