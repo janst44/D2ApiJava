@@ -80,7 +80,6 @@ public class DotaMatchStatCollector {
                 saveDataToFile(lastSequenceNumber);
                 saveCounter = 0;
             }
-            getHeroJsonKeepTop5CountersPerHero();
             Thread.sleep(10000); // don't pound the server too fast
         }
     }

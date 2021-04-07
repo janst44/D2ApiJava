@@ -13,9 +13,28 @@ public class AllHeroStats {
 
     // hero name to stats
     private Map<String, SingleHeroStats> heroStats;
+    private int totalGamesRecorded;
 
     public void setHeroStats(Map<String, SingleHeroStats> heroStats) {
         this.heroStats = heroStats;
+        setTotalGamesRecorded();
+    }
+
+    public int getTotalGamesRecorded() {
+        return totalGamesRecorded;
+    }
+
+    public void setTotalGamesRecorded(int totalGamesRecorded) {
+        this.totalGamesRecorded = totalGamesRecorded;
+    }
+    public void setTotalGamesRecorded() {
+        int runningTotal = 0;
+        for (SingleHeroStats singleHeroStats : heroStats.values()) {
+            for(WinLossTotals winLossTotals : singleHeroStats.getOpponents().values()) {
+                runningTotal += winLossTotals.getTotalNumGames();
+            }
+        }
+        this.totalGamesRecorded = runningTotal;
     }
 
     //Add new hero or update stats for existing hero
@@ -27,8 +46,9 @@ public class AllHeroStats {
     }
 
     public void setAllCalculatedFieldsForSerialization() {
+        setTotalGamesRecorded();
         for (SingleHeroStats singleHeroStats : heroStats.values()) {
-            singleHeroStats.setAllCalculatedFields();
+            singleHeroStats.setAllCalculatedFields(totalGamesRecorded, this);
         }
     }
 

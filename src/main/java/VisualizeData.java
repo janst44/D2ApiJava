@@ -23,9 +23,7 @@ public class VisualizeData {
         Map<String, SingleHeroStats> top5Counters = allHeroStats.getHeroStats();
 
         int n = 5;
-        Iterator<Map.Entry<String, SingleHeroStats>> iterator = top5Counters.entrySet().iterator();
-        while(iterator.hasNext()) {
-            Map.Entry<String, SingleHeroStats> entry = iterator.next();
+        for (Map.Entry<String, SingleHeroStats> entry : top5Counters.entrySet()) {
             List<Map.Entry<String, WinLossTotals>> greatest = findGreatest(entry.getValue().getOpponents(), n);
             SingleHeroStats singleHeroStats = new SingleHeroStats(entry.getValue());
             for (Map.Entry<String, WinLossTotals> oneOfTheGreatestCounters : greatest) {
@@ -37,7 +35,6 @@ public class VisualizeData {
         try {
             ObjectMapper objectMapper= new ObjectMapper();
             json = objectMapper.writeValueAsString(allHeroStats);
-            System.out.println(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -48,8 +45,33 @@ public class VisualizeData {
      * If none of a hero's counters are popular hero's that is good
      */
     public static String getBestFirstPickPool(AllHeroStats allHeroStats, int numToGet) {
+        int numToGetPlusOneBecausePriorityQueueSucks = numToGet +1;
+        String json = "";
+        PriorityQueue<Map.Entry<String, SingleHeroStats>> pq = new PriorityQueue<>(numToGetPlusOneBecausePriorityQueueSucks, new SingleHeroStatsFirstPickComparator());
+        for (Map.Entry<String, SingleHeroStats> entry : allHeroStats.getHeroStats().entrySet())
+        {
+            pq.offer(entry);
+            while (pq.size() > numToGetPlusOneBecausePriorityQueueSucks)
+            {
+                pq.poll();
+            }
+        }
+        pq.poll();
 
-        return "";
+        Map<String, SingleHeroStats> bestFirstPicks = new LinkedHashMap<>();
+        while(pq.size() > 0) {
+            Map.Entry<String, SingleHeroStats> entry = pq.poll();
+            bestFirstPicks.put(entry.getKey(), entry.getValue());
+        }
+        allHeroStats.setHeroStats(bestFirstPicks);
+        try {
+            ObjectMapper objectMapper= new ObjectMapper();
+            json = objectMapper.writeValueAsString(allHeroStats);
+            System.out.println(json);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return json;
     }
 
     public static String getBestSecondPickPool(AllHeroStats allHeroStats) {
