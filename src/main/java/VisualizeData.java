@@ -45,23 +45,15 @@ public class VisualizeData {
      * If none of a hero's counters are popular hero's that is good
      */
     public static String getBestFirstPickPool(AllHeroStats allHeroStats, int numToGet) {
-        int numToGetPlusOneBecausePriorityQueueSucks = numToGet +1;
         String json = "";
-        PriorityQueue<Map.Entry<String, SingleHeroStats>> pq = new PriorityQueue<>(numToGetPlusOneBecausePriorityQueueSucks, new SingleHeroStatsFirstPickComparator());
-        for (Map.Entry<String, SingleHeroStats> entry : allHeroStats.getHeroStats().entrySet())
-        {
-            pq.offer(entry);
-            while (pq.size() > numToGetPlusOneBecausePriorityQueueSucks)
-            {
-                pq.poll();
-            }
-        }
-        pq.poll();
+        PriorityQueue<Map.Entry<String, SingleHeroStats>> pq = new PriorityQueue<>(numToGet, new SingleHeroStatsFirstPickComparator());
+        pq.addAll(allHeroStats.getHeroStats().entrySet());
 
         Map<String, SingleHeroStats> bestFirstPicks = new LinkedHashMap<>();
-        while(pq.size() > 0) {
+        while(numToGet > 0) {
             Map.Entry<String, SingleHeroStats> entry = pq.poll();
             bestFirstPicks.put(entry.getKey(), entry.getValue());
+            numToGet--;
         }
         allHeroStats.setHeroStats(bestFirstPicks);
         try {

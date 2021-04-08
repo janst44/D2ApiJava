@@ -9,9 +9,9 @@ import java.util.Map;
 public class SingleHeroStatsFirstPickComparator implements Comparator<Map.Entry<String, SingleHeroStats>> {
     @Override
     public int compare(Map.Entry<String, SingleHeroStats> t1, Map.Entry<String, SingleHeroStats> t2) {
-        if (t1.getValue().getFirstPickRating() > t2.getValue().getFirstPickRating()) {
+        if (t1.getValue().getFirstPickRating() < t2.getValue().getFirstPickRating()) {
             return 1;
         }
-        return 0;
+        return -1;
     }
 }
