@@ -32,6 +32,9 @@ public class SingleHeroStats {
     // copy constructor
     public SingleHeroStats(SingleHeroStats singleHeroStats){
         // dont copy opponents for this constructor
+        if(this.opponents == null) {
+            this.opponents = new LinkedHashMap<>();
+        }
         this.totalWinRateAsThisHero = singleHeroStats.totalWinRateAsThisHero;
         this.totalGamesPlayed = singleHeroStats.totalGamesPlayed;
         this.totalWinRateByOpponentByUnitAsThisHero=singleHeroStats.totalWinRateByOpponentByUnitAsThisHero;
