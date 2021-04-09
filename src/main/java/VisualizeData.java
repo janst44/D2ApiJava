@@ -80,18 +80,13 @@ public class VisualizeData {
     findGreatest(Map<K, V> map, int n)
     {
         Comparator<? super Map.Entry<K, V>> comparator =
-                new Comparator<Map.Entry<K, V>>()
-                {
-                    @Override
-                    public int compare(Map.Entry<K, V> e0, Map.Entry<K, V> e1)
-                    {
-                        V v0 = e0.getValue();
-                        V v1 = e1.getValue();
-                        return v0.compareTo(v1);
-                    }
+                (Comparator<Map.Entry<K, V>>) (e0, e1) -> {
+                    V v0 = e0.getValue();
+                    V v1 = e1.getValue();
+                    return v0.compareTo(v1);
                 };
         PriorityQueue<Map.Entry<K, V>> highest =
-                new PriorityQueue<Map.Entry<K,V>>(n, comparator);
+                new PriorityQueue<>(n, comparator);
         for (Map.Entry<K, V> entry : map.entrySet())
         {
             highest.offer(entry);
@@ -101,7 +96,7 @@ public class VisualizeData {
             }
         }
 
-        List<Map.Entry<K, V>> result = new ArrayList<Map.Entry<K,V>>();
+        List<Map.Entry<K, V>> result = new ArrayList<>();
         while (highest.size() > 0)
         {
             result.add(highest.poll());
@@ -112,11 +107,10 @@ public class VisualizeData {
     private static String getSortedData(AllHeroStats allHeroStats, Comparator comparator) {
         String json = "";
         List<Map.Entry<String, SingleHeroStats>> list = new ArrayList<>(allHeroStats.getHeroStats().entrySet());
-        Collections.sort(list, comparator);
+        list.sort(comparator);
         Map<String, SingleHeroStats> sortedMap = new LinkedHashMap<>();
-        for(Object entry : list){
-            Map.Entry<String, SingleHeroStats> addType = (Map.Entry<String, SingleHeroStats>) entry;
-            sortedMap.put(addType.getKey(), addType.getValue());
+        for(Map.Entry<String, SingleHeroStats> entry : list){
+            sortedMap.put(entry.getKey(), entry.getValue());
         }
         try {
             ObjectMapper objectMapper= new ObjectMapper();

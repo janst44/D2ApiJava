@@ -13,7 +13,7 @@ public class FileOperations {
 
     private FileOperations() {}
 
-    public static String loadDataFromFile() throws FileNotFoundException {
+    public static String loadDataFromFile() {
         StringBuilder data = new StringBuilder();
         try {
             File file = new File("saveDotaStats.txt");

@@ -13,7 +13,7 @@ public class DotaMatchStatCollector {
     public static final String ANSI_RED = "\u001B[31m";
 
     private AllHeroStats allHeroStats;
-    private Map<String, String> heroes;
+    private final Map<String, String> heroes;
     private static final int MATCHES_BATCH_SIZE = 101; // seems like 100 every 10 seconds is good because sometimes I get less
     private static final int SAVE_EVERY_X_REQUESTS = 25;
 
@@ -30,7 +30,7 @@ public class DotaMatchStatCollector {
     }
 
     public void startReadingFromAPI() throws Exception {
-        String lastSequenceNumber = "";
+        String lastSequenceNumber;
         try {
             lastSequenceNumber = getMostRecentSequenceNumber(); // pass prev offset each time
         } catch (Exception e) {
@@ -41,12 +41,12 @@ public class DotaMatchStatCollector {
         while(true) {
             JSONArray matches;
             try {
-                matches = getMatchesJsonArray(lastSequenceNumber, MATCHES_BATCH_SIZE);
+                matches = getMatchesJsonArray(lastSequenceNumber);
             } catch(Exception e) {
                 e.printStackTrace();
                 System.out.println("Getting most recent seq number to restart from to avoid continued errors");
                 lastSequenceNumber = "0";
-                while(lastSequenceNumber == "0") {
+                while(lastSequenceNumber.equals("0")) {
                     try{
                         lastSequenceNumber = getMostRecentSequenceNumber();
                     } catch (Exception ex) {
@@ -120,10 +120,10 @@ public class DotaMatchStatCollector {
         return matchesArray.getJSONObject(0).get("match_seq_num").toString();
     }
 
-    private JSONArray getMatchesJsonArray(String offsetSeqNumber, int batchSize) throws JSONException, IOException {
-        String url = "http://api.steampowered.com/IDOTA2Match_570/GetMatchHistoryBySequenceNum/v1?key=F4AB12444F7DB98F6462D9CB58656B4E&start_at_match_seq_num=" + offsetSeqNumber + "&matches_requested=" + batchSize;
+    private JSONArray getMatchesJsonArray(String offsetSeqNumber) throws JSONException, IOException {
+        String url = "https://api.steampowered.com/IDOTA2Match_570/GetMatchHistoryBySequenceNum/v1?key=F4AB12444F7DB98F6462D9CB58656B4E&start_at_match_seq_num=" + offsetSeqNumber + "&matches_requested=" + DotaMatchStatCollector.MATCHES_BATCH_SIZE;
         JsonWebRequest jsonWebRequest = new JsonWebRequest();
-        JSONObject responseObj = null;
+        JSONObject responseObj;
         try {
             responseObj = jsonWebRequest.getJsonData(url);
         } catch(Exception e) {
@@ -147,11 +147,7 @@ public class DotaMatchStatCollector {
             JSONArray players = match.getJSONArray("players");
             String outcome = match.get("radiant_win").toString();
             boolean radiant_win;
-            if (outcome.equals("true")) {
-                radiant_win = true;
-            } else {
-                radiant_win = false;
-            }
+            radiant_win = outcome.equals("true");
 
             //FOr each player's hero add won/lost against stat
             for (int i = 0; i < players.length(); i++) {
@@ -162,10 +158,7 @@ public class DotaMatchStatCollector {
                     throw new IllegalStateException("hero_id was 0");
                 }
                 String player_slot = innerObj.get("player_slot").toString();
-                boolean won = false;
-                if ((Integer.parseInt(player_slot) < 10 && radiant_win) || (Integer.parseInt(player_slot) > 100 && !radiant_win)) {
-                    won = true;
-                }
+                boolean won = (Integer.parseInt(player_slot) < 10 && radiant_win) || (Integer.parseInt(player_slot) > 100 && !radiant_win);
                 for (int j = 0; j < players.length(); j++) {// each opponent
                     String player2_slot = players.getJSONObject((j)).get("player_slot").toString();
                     if (abs(Integer.parseInt(player_slot) - Integer.parseInt(player2_slot)) < 100) {
@@ -204,7 +197,6 @@ public class DotaMatchStatCollector {
             allHeroStatsDeepCopy = JsonUtilities.getAllHeroObj(JsonUtilities.getAllHeroJson(allHeroStats));
         } catch (IOException e) {
             e.printStackTrace();
-            allHeroStatsDeepCopy = null;
         }
         if(allHeroStatsDeepCopy == null) {
             System.out.println("There was an issue copying data for visualization. Empty string returned.");
@@ -233,13 +225,13 @@ public class DotaMatchStatCollector {
     }
 
     /**
-     * Returns a JSON String representation of the top x heros to pick during the first picking phase
-     * @param numHeros the number of hero's to return
+     * Returns a JSON String representation of the top x heroes to pick during the first picking phase
+     * @param numHeroes the number of hero's to return
      * @return a JSON String with the best choice of hero first to the worst being last
      */
-    public String getBestFirstPickPool(int numHeros) {
+    public String getBestFirstPickPool(int numHeroes) {
         AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
-        return VisualizeData.getBestFirstPickPool(allHeroStatsDeepCopy, numHeros);
+        return VisualizeData.getBestFirstPickPool(allHeroStatsDeepCopy, numHeroes);
     }
 
     public String getBestSecondPickPool() {
