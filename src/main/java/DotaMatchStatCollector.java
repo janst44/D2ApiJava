@@ -39,6 +39,7 @@ public class DotaMatchStatCollector {
         }
         int saveCounter = 0;
         while(true) {
+            System.out.println("Executing batch " + saveCounter + " of " + SAVE_EVERY_X_REQUESTS);
             JSONArray matches;
             try {
                 matches = getMatchesJsonArray(lastSequenceNumber);
@@ -219,9 +220,9 @@ public class DotaMatchStatCollector {
         return VisualizeData.getHerosByAggregateWinRate(allHeroStatsDeepCopy, new WinRateComparator());
     }
 
-    public String getHeroJsonKeepTop5CountersPerHero() { // modifies the stats so need to create deep copy
+    public String getHeroJsonKeepTopNCountersPerHero(int numCounters) { // modifies the stats so need to create deep copy
         AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
-        return VisualizeData.getHerosAlphabeticallyIncludeTop5Counters(allHeroStatsDeepCopy);
+        return VisualizeData.getHerosAlphabeticallyIncludeTopNCounters(allHeroStatsDeepCopy, numCounters);
     }
 
     /**
@@ -234,14 +235,19 @@ public class DotaMatchStatCollector {
         return VisualizeData.getBestFirstPickPool(allHeroStatsDeepCopy, numHeroes);
     }
 
-    public String getBestSecondPickPool() {
+    public String getBestSecondPickPool(String opponentHero1, String opponentHero2, int numHeroes) {
         AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
-        return VisualizeData.getBestSecondPickPool(allHeroStatsDeepCopy);
+        return VisualizeData.getBestSecondPickPool(allHeroStatsDeepCopy, opponentHero1, opponentHero2, numHeroes);
     }
 
-    public String getBestFinalPickPool() {
+    public String getBestFinalPickPool(String opponentHero1, String opponentHero2, String opponentHero3, String opponentHero4, int numHeroes) {
         AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
-        return VisualizeData.getBestFinalPickPool(allHeroStatsDeepCopy);
+        return VisualizeData.getBestFinalPickPool(allHeroStatsDeepCopy, opponentHero1, opponentHero2, opponentHero3, opponentHero4, numHeroes);
+    }
+
+    public double getStatisticalAdvantageTeamScore(String hero1, String hero2, String hero3, String hero4, String hero5, String op1, String op2, String op3, String op4, String op5) {
+        AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
+        return VisualizeData.getStatisticalAdvantageTeamScore(allHeroStatsDeepCopy, hero1, hero2, hero3, hero4, hero5, op1, op2, op3, op4, op5);
     }
 
 

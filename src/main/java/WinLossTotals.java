@@ -28,4 +28,12 @@ public class WinLossTotals implements Comparable<WinLossTotals> {
         }
         return 1;
     }
+
+    public int getWins() {
+        return wins;
+    }
+
+    public int getLosses() {
+        return losses;
+    }
 }

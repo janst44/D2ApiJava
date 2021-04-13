@@ -205,7 +205,4 @@ public class SingleHeroStats {
     public void setFirstPickRating() {
         this.firstPickRating = (aggregateCounterPopularityScore * (numHerosBetterAgainst/numHerosWorseAgainst) * totalWinRateByOpponentByUnitAsThisHero * (totalWinRateAsThisHero/2));
     }
-
-
-
 }
