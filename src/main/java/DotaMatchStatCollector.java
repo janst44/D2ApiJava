@@ -17,7 +17,21 @@ public class DotaMatchStatCollector {
     private static final int MATCHES_BATCH_SIZE = 101; // seems like 100 every 10 seconds is good because sometimes I get less
     private static final int SAVE_EVERY_X_REQUESTS = 25;
 
-    public DotaMatchStatCollector() throws Exception {
+    private static DotaMatchStatCollector instance;
+
+    static {
+        try {
+            instance = new DotaMatchStatCollector();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static DotaMatchStatCollector getInstance() {
+        return instance;
+    }
+
+    private DotaMatchStatCollector() throws Exception {
         try {
             loadDataFromFile();
             System.out.println("HeroStats loaded from file successfully");

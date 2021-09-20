@@ -6,7 +6,7 @@
 public class Application {
     public static void main(String[] args) {
         try {
-            DotaMatchStatCollector dotaMatchStatCollector = new DotaMatchStatCollector();
+            DotaMatchStatCollector dotaMatchStatCollector = DotaMatchStatCollector.getInstance();
             dotaMatchStatCollector.startReadingFromAPI();
         } catch (Exception e) {
             e.printStackTrace();
