@@ -1,3 +1,5 @@
+package dota;
+
 import java.util.Comparator;
 import java.util.Map;
 
@@ -6,7 +8,7 @@ import java.util.Map;
  * User: Joshua Campbell
  * Date: 4/9/21
  */
-public class SingleHeroStatsSecondPickComparator implements Comparator<Map.Entry<String, SingleHeroStats>> {
+public class SingleHeroStatsFinalPickComparator implements Comparator<Map.Entry<String, SingleHeroStats>> {
     @Override
     public int compare(Map.Entry<String, SingleHeroStats> t1, Map.Entry<String, SingleHeroStats> t2) {
         if (t1.getValue().getFirstPickRating() < t2.getValue().getFirstPickRating()) {

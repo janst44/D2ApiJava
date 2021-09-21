@@ -1,6 +1,5 @@
-To Run from the directory containing the pom file run the following:
-1. mvn compile
-2. mvn exec:java -Dexec.mainClass="HttpGetData"
+To Run from the directory containing the pom.xml file run the following:
+1. mvn spring-boot:run
 
 TODO:
 Add entire record to a database for future ML (synergies and counters detailed like even items)
