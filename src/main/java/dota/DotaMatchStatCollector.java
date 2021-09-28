@@ -61,7 +61,7 @@ public class DotaMatchStatCollector {
                 matches = getMatchesJsonArray(lastSequenceNumber);
             } catch(Exception e) {
                 e.printStackTrace();
-                System.out.println("Getting most recent seq number to restart from to avoid continued errors");
+                System.out.println("Getting most recent seq number to restart at in order to avoid continued errors");
                 lastSequenceNumber = "0";
                 while(lastSequenceNumber.equals("0")) {
                     try{

@@ -14,11 +14,8 @@
   <artifactId>d2api</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <properties>
-    <maven.compiler.release>11</maven.compiler.release>
-  </properties>
-
   <dependencies>
+
     <dependency>
       <groupId>com.daveayan</groupId>
       <artifactId>rjson</artifactId>
@@ -30,11 +27,13 @@
       <artifactId>jackson-databind</artifactId>
       <version>2.11.4</version>
     </dependency>
+
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
       <version>2.11.4</version>
     </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
@@ -47,21 +46,5 @@
     </dependency>
 
   </dependencies>
-
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-maven-plugin</artifactId>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.1</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 
 </project>
