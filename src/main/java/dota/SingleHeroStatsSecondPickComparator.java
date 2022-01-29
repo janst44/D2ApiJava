@@ -1,17 +1,16 @@
 package dota;
 
 import java.util.Comparator;
-import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
  * User: Joshua Campbell
  * Date: 4/9/21
  */
-public class SingleHeroStatsSecondPickComparator implements Comparator<Map.Entry<String, SingleHeroStats>> {
+public class SingleHeroStatsSecondPickComparator implements Comparator<SingleHeroStats> {
     @Override
-    public int compare(Map.Entry<String, SingleHeroStats> t1, Map.Entry<String, SingleHeroStats> t2) {
-        if (t1.getValue().getFirstPickRating() < t2.getValue().getFirstPickRating()) {
+    public int compare(SingleHeroStats t1, SingleHeroStats t2) {
+        if (t1.getFirstPickRating() < t2.getFirstPickRating()) {
             return 1;
         }
         return -1;

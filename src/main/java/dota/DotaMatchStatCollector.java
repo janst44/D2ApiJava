@@ -1,11 +1,12 @@
 package dota;
 
-import java.io.IOException;
-import java.util.*;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.lang.Math.abs;
 
@@ -89,7 +90,7 @@ public class DotaMatchStatCollector {
     }
 
     private String retryGetAndSetLastSeqNumber() throws InterruptedException {
-        System.out.println("Getting most recent seq number to restart at in order to avoid continued errors");
+        System.out.println("Getting most recent seq number to start at");
         String lastSequenceNumber = "0";
         while(lastSequenceNumber.equals("0")) {
             try{
@@ -228,7 +229,8 @@ public class DotaMatchStatCollector {
 
     // TODO: move below methods to controller
     public String getHeroJsonAlphabetically() {
-        return JsonUtilities.getAllHeroJson(allHeroStats);
+        AllHeroStats allHeroStatsDeepCopy = copyAllHeroData();
+        return VisualizeData.getHerosAlphabetically(allHeroStatsDeepCopy);
     }
 
     public String getHeroJsonByUnitWinRate() { // modifies the stats so need to create deep copy

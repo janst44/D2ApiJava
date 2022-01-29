@@ -1,7 +1,7 @@
 package dota;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -10,14 +10,14 @@ import java.util.TreeMap;
  */
 public class AllHeroStats {
     public AllHeroStats(){
-        heroStats = new TreeMap<>();
+        heroStats = new ArrayList<>();
     }
 
     // hero name to stats
-    private Map<String, SingleHeroStats> heroStats;
+    private List<SingleHeroStats> heroStats;
     private int totalGamesRecorded;
 
-    public void setHeroStats(Map<String, SingleHeroStats> heroStats) {
+    public void setHeroStats(List<SingleHeroStats> heroStats) {
         this.heroStats = heroStats;
         setTotalGamesRecorded();
     }
@@ -31,7 +31,7 @@ public class AllHeroStats {
     }
     public void setTotalGamesRecorded() {
         int runningTotal = 0;
-        for (SingleHeroStats singleHeroStats : heroStats.values()) {
+        for (SingleHeroStats singleHeroStats : heroStats) {
             for(WinLossTotals winLossTotals : singleHeroStats.getOpponents().values()) {
                 runningTotal += winLossTotals.getTotalNumGames();
             }
@@ -41,20 +41,20 @@ public class AllHeroStats {
 
     //Add new hero or update stats for existing hero
     public void add(String name, String opponentName, boolean win){
-        if (!heroStats.containsKey(name)) {
-            heroStats.put(name, new SingleHeroStats(name));
+        if (heroStats.stream().filter(stat -> name.equals(stat.getHeroName())).findFirst().orElse(null) == null) {
+            heroStats.add(new SingleHeroStats(name));
         }
-        heroStats.get(name).add(opponentName, win);
+        heroStats.stream().filter(stat -> name.equals(stat.getHeroName())).findFirst().orElse(null).add(opponentName, win);
     }
 
     public void setAllCalculatedFieldsForSerialization() {
         setTotalGamesRecorded();
-        for (SingleHeroStats singleHeroStats : heroStats.values()) {
+        for (SingleHeroStats singleHeroStats : heroStats) {
             singleHeroStats.setAllCalculatedFields(totalGamesRecorded, this);
         }
     }
 
-    public Map<String, SingleHeroStats> getHeroStats() {
+    public List<SingleHeroStats> getHeroStats() {
         return heroStats;
     }
 }

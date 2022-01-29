@@ -1,5 +1,7 @@
 package dota;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.*;
 
 /**
@@ -19,7 +21,7 @@ public class SingleHeroStats {
     private double numHerosWorseAgainst;
     private double firstPickRating;
 
-    public SingleHeroStats(String heroName){
+    public SingleHeroStats(@JsonProperty("heroName") String heroName){
         this.heroName = heroName;
         opponents = new TreeMap<>();
 
@@ -149,9 +151,9 @@ public class SingleHeroStats {
         }
         // add all the popularities scores up for each hero with a positive win rate against this hero and then divide by the number of scores
         double sumCounterHeroPopularity = 0;
-        for(Map.Entry<String, SingleHeroStats> entry : allHeroStats.getHeroStats().entrySet()) {
-            if (countersHeroNames.contains(entry.getKey())) {
-                sumCounterHeroPopularity += (0.5 - entry.getValue().getPopularityScore());
+        for(SingleHeroStats entry : allHeroStats.getHeroStats()) {
+            if (countersHeroNames.contains(entry.getHeroName())) {
+                sumCounterHeroPopularity += (0.5 - entry.getPopularityScore());
             }
         }
         aggregateCounterPopularityScore = sumCounterHeroPopularity;
@@ -210,4 +212,14 @@ public class SingleHeroStats {
     public void setFirstPickRating() {
         this.firstPickRating = (aggregateCounterPopularityScore * (numHerosBetterAgainst/numHerosWorseAgainst) * totalWinRateByOpponentByUnitAsThisHero * (totalWinRateAsThisHero/2));
     }
+
+    public String getHeroName() {
+        return heroName;
+    }
+
+    public void setHeroName(String heroName) {
+        this.heroName = heroName;
+    }
+
+
 }

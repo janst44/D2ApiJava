@@ -1,32 +1,31 @@
 package dota;
 
 import java.util.Comparator;
-import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
  * User: Joshua Campbell
  * Date: 3/30/21
  */
-public class WinRateComparator implements Comparator<Map.Entry<String, SingleHeroStats>> {
+public class WinRateComparator implements Comparator<SingleHeroStats> {
     @Override
-    public int compare(Map.Entry<String, SingleHeroStats> o1, Map.Entry<String, SingleHeroStats> o2) {
-        if(o1.getValue().getTotalWinRateAsThisHero() < o2.getValue().getTotalWinRateAsThisHero()) {
+    public int compare(SingleHeroStats o1,  SingleHeroStats o2) {
+        if(o1.getTotalWinRateAsThisHero() < o2.getTotalWinRateAsThisHero()) {
             return 1;
         }
-        if(o1.getValue().getTotalWinRateAsThisHero() > o2.getValue().getTotalWinRateAsThisHero()) {
+        if(o1.getTotalWinRateAsThisHero() > o2.getTotalWinRateAsThisHero()) {
             return -1;
         }
-        if(o1.getValue().getTotalWinRateByOpponentByUnitAsThisHero() < o2.getValue().getTotalWinRateByOpponentByUnitAsThisHero()) {
+        if(o1.getTotalWinRateByOpponentByUnitAsThisHero() < o2.getTotalWinRateByOpponentByUnitAsThisHero()) {
             return 1;
         }
-        if(o1.getValue().getTotalWinRateByOpponentByUnitAsThisHero() > o2.getValue().getTotalWinRateByOpponentByUnitAsThisHero()) {
+        if(o1.getTotalWinRateByOpponentByUnitAsThisHero() > o2.getTotalWinRateByOpponentByUnitAsThisHero()) {
             return -1;
         }
-        if(o1.getValue().getTotalGamesPlayed() < o2.getValue().getTotalGamesPlayed()) {
+        if(o1.getTotalGamesPlayed() < o2.getTotalGamesPlayed()) {
             return 1;
         }
-        if(o1.getValue().getTotalGamesPlayed() > o2.getValue().getTotalGamesPlayed()) {
+        if(o1.getTotalGamesPlayed() > o2.getTotalGamesPlayed()) {
             return -1;
         }
         return 1;

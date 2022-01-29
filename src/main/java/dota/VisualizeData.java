@@ -14,6 +14,18 @@ import java.util.stream.Stream;
  */
 public class VisualizeData {
 
+    public static String getHerosAlphabetically(AllHeroStats allHeroStats) {
+        String json = "";
+        allHeroStats.setHeroStats(allHeroStats.getHeroStats().stream().sorted(Comparator.comparing(SingleHeroStats::getHeroName)).collect(Collectors.toList()));
+        try {
+            ObjectMapper objectMapper= new ObjectMapper();
+            json = objectMapper.writeValueAsString(allHeroStats);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return json;
+    }
+
     public static String getHerosByUnitWinRate(AllHeroStats allHeroStats, WinRateByUnitComparator winRateByUnitComparator) {
         return getSortedData(allHeroStats, winRateByUnitComparator);
     }
@@ -24,17 +36,18 @@ public class VisualizeData {
 
     public static String getHerosAlphabeticallyIncludeTopNCounters(AllHeroStats allHeroStats, int numCountersToGet) {
         String json = "";
-        Map<String, SingleHeroStats> top5Counters = allHeroStats.getHeroStats();
+        List<SingleHeroStats> top5Counters = allHeroStats.getHeroStats();
 
-        for (Map.Entry<String, SingleHeroStats> entry : top5Counters.entrySet()) {
-            List<Map.Entry<String, WinLossTotals>> greatest = findGreatest(entry.getValue().getOpponents(), numCountersToGet);
-            SingleHeroStats singleHeroStats = new SingleHeroStats(entry.getKey(), entry.getValue());
+        for (int i = 0; i < top5Counters.size(); i++) {
+            SingleHeroStats stat = top5Counters.get(i);
+            List<Map.Entry<String, WinLossTotals>> greatest = findGreatest(stat.getOpponents(), numCountersToGet);
+            SingleHeroStats singleHeroStats = new SingleHeroStats(stat.getHeroName(), stat); // doesn't set the stat here (copy constructor)
             for (Map.Entry<String, WinLossTotals> oneOfTheGreatestCounters : greatest) {
                 singleHeroStats.setOpponentByString(oneOfTheGreatestCounters.getKey(), oneOfTheGreatestCounters.getValue());
             }
-            top5Counters.replace(entry.getKey(), singleHeroStats);
+            top5Counters.set(i, singleHeroStats);
         }
-        allHeroStats.setHeroStats(top5Counters);
+        allHeroStats.setHeroStats(top5Counters.stream().sorted(Comparator.comparing(SingleHeroStats::getHeroName)).collect(Collectors.toList()));
         try {
             ObjectMapper objectMapper= new ObjectMapper();
             json = objectMapper.writeValueAsString(allHeroStats);
@@ -49,13 +62,13 @@ public class VisualizeData {
      */
     public static String getBestFirstPickPool(AllHeroStats allHeroStats, int numToGet) {
         String json = "";
-        PriorityQueue<Map.Entry<String, SingleHeroStats>> pq = new PriorityQueue<>(numToGet, new SingleHeroStatsFirstPickComparator());
-        pq.addAll(allHeroStats.getHeroStats().entrySet());
+        PriorityQueue<SingleHeroStats> pq = new PriorityQueue<>(numToGet, new SingleHeroStatsFirstPickComparator());
+        pq.addAll(allHeroStats.getHeroStats());
 
-        Map<String, SingleHeroStats> bestFirstPicks = new LinkedHashMap<>();
+        List<SingleHeroStats> bestFirstPicks = new ArrayList<>();
         while(numToGet > 0) {
-            Map.Entry<String, SingleHeroStats> entry = pq.poll();
-            bestFirstPicks.put(entry.getKey(), entry.getValue());
+            SingleHeroStats entry = pq.poll();
+            bestFirstPicks.add(entry);
             numToGet--;
         }
         allHeroStats.setHeroStats(bestFirstPicks);
@@ -82,9 +95,9 @@ public class VisualizeData {
                 input.collect(ArrayList::new,
                         (list, e) -> list.add(0, e),
                         (list1, list2) -> list1.addAll(0, list2));
-        Map<String, SingleHeroStats> bestSecondPicks = new LinkedHashMap<>();
+        List<SingleHeroStats> bestSecondPicks = new ArrayList<>();
         for(String heroName : output.stream().map(Map.Entry::getKey).collect(Collectors.toList())) {
-            bestSecondPicks.put(heroName, allHeroStats.getHeroStats().get(heroName));
+            bestSecondPicks.add(allHeroStats.getHeroStats().stream().filter(stat -> heroName.equals(stat.getHeroName())).findFirst().orElse(null));
         }
         allHeroStats.setHeroStats(bestSecondPicks);
 
@@ -101,18 +114,18 @@ public class VisualizeData {
 
     private static SingleHeroStats getAggregateCounterPick(AllHeroStats allHeroStats,  List<String> heroesToCounter) {
         LinkedList<String> removableList = new LinkedList<>(heroesToCounter);
-        SingleHeroStats singleHeroStats = allHeroStats.getHeroStats().get(removableList.get(0));
+        SingleHeroStats singleHeroStats = allHeroStats.getHeroStats().stream().filter(stat -> removableList.get(0).equals(stat.getHeroName())).findFirst().orElse(null);
         removableList.remove(0);
         for(Map.Entry<String, WinLossTotals> entry: singleHeroStats.getOpponents().entrySet()) {
             if(removableList.contains(entry.getKey())){
                 continue;
             }
             for (String hero: removableList) {
-                if(!allHeroStats.getHeroStats().get(hero).getOpponents().containsKey(entry.getKey())){
+                if(!allHeroStats.getHeroStats().stream().filter(stat -> hero.equals(stat.getHeroName())).findFirst().orElse(null).getOpponents().containsKey(entry.getKey())){
                     continue;
                 }
-                entry.getValue().losses += allHeroStats.getHeroStats().get(hero).getOpponents().get(entry.getKey()).losses;
-                entry.getValue().wins += allHeroStats.getHeroStats().get(hero).getOpponents().get(entry.getKey()).wins;
+                entry.getValue().losses += allHeroStats.getHeroStats().stream().filter(stat -> hero.equals(stat.getHeroName())).findFirst().orElse(null).getOpponents().get(entry.getKey()).losses;
+                entry.getValue().wins += allHeroStats.getHeroStats().stream().filter(stat -> hero.equals(stat.getHeroName())).findFirst().orElse(null).getOpponents().get(entry.getKey()).wins;
             }
         }
         return singleHeroStats;
@@ -133,9 +146,9 @@ public class VisualizeData {
                 input.collect(ArrayList::new,
                         (list, e) -> list.add(0, e),
                         (list1, list2) -> list1.addAll(0, list2));
-        Map<String, SingleHeroStats> bestFinalPicks = new LinkedHashMap<>();
+        List<SingleHeroStats> bestFinalPicks = new ArrayList<>();
         for(String heroName : output.stream().map(Map.Entry::getKey).collect(Collectors.toList())) {
-            bestFinalPicks.put(heroName, allHeroStats.getHeroStats().get(heroName));
+            bestFinalPicks.add(allHeroStats.getHeroStats().stream().filter(stat -> heroName.equals(stat.getHeroName())).findFirst().orElse(null));
         }
         allHeroStats.setHeroStats(bestFinalPicks);
 
@@ -194,15 +207,15 @@ public class VisualizeData {
 
     private static String getSortedData(AllHeroStats allHeroStats, Comparator comparator) {
         String json = "";
-        List<Map.Entry<String, SingleHeroStats>> list = new ArrayList<>(allHeroStats.getHeroStats().entrySet());
+        List<SingleHeroStats> list = allHeroStats.getHeroStats();
         list.sort(comparator);
-        Map<String, SingleHeroStats> sortedMap = new LinkedHashMap<>();
-        for(Map.Entry<String, SingleHeroStats> entry : list){
-            sortedMap.put(entry.getKey(), entry.getValue());
+        List<SingleHeroStats> sortedList = new ArrayList<>();
+        for(SingleHeroStats entry : list){
+            sortedList.add(entry);
         }
         try {
             ObjectMapper objectMapper= new ObjectMapper();
-            json = objectMapper.writeValueAsString(sortedMap);
+            json = objectMapper.writeValueAsString(sortedList);
             System.out.println(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
