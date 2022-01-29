@@ -8,6 +8,7 @@ import java.util.*;
  * Date: 3/19/21
  */
 public class SingleHeroStats {
+    private String heroName;
     private Map<String, WinLossTotals> opponents;
     private double totalWinRateAsThisHero;
     private int totalGamesPlayed;
@@ -18,7 +19,8 @@ public class SingleHeroStats {
     private double numHerosWorseAgainst;
     private double firstPickRating;
 
-    public SingleHeroStats(){
+    public SingleHeroStats(String heroName){
+        this.heroName = heroName;
         opponents = new TreeMap<>();
 
         totalWinRateAsThisHero = 0;
@@ -32,7 +34,8 @@ public class SingleHeroStats {
     }
 
     // copy constructor
-    public SingleHeroStats(SingleHeroStats singleHeroStats){
+    public SingleHeroStats(String heroName, SingleHeroStats singleHeroStats){
+        this.heroName = heroName;
         this.opponents = new LinkedHashMap<>();
         this.totalWinRateAsThisHero = singleHeroStats.totalWinRateAsThisHero;
         this.totalGamesPlayed = singleHeroStats.totalGamesPlayed;

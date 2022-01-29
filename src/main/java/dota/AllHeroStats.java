@@ -42,7 +42,7 @@ public class AllHeroStats {
     //Add new hero or update stats for existing hero
     public void add(String name, String opponentName, boolean win){
         if (!heroStats.containsKey(name)) {
-            heroStats.put(name, new SingleHeroStats());
+            heroStats.put(name, new SingleHeroStats(name));
         }
         heroStats.get(name).add(opponentName, win);
     }

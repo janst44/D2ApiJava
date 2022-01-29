@@ -42,17 +42,17 @@ public class DotaRestController {
     }
 
     @GetMapping("/getBestSecondPickPool")
-    public @ResponseBody ResponseEntity<String> getBestSecondPickPool(String opponentHero1, String opponentHero2, @RequestParam(value = "numHeroes", defaultValue = "10") int numHeroes) {
-        return new ResponseEntity<>(DotaMatchStatCollector.getInstance().getBestSecondPickPool(opponentHero1, opponentHero2, numHeroes), HttpStatus.OK);
+    public @ResponseBody ResponseEntity<String> getBestSecondPickPool(@RequestParam String op1, @RequestParam String op2, @RequestParam(value = "numHeroes", defaultValue = "10") int numHeroes) {
+        return new ResponseEntity<>(DotaMatchStatCollector.getInstance().getBestSecondPickPool(op1, op2, numHeroes), HttpStatus.OK);
     }
 
     @GetMapping("/getBestFinalPickPool")
-    public @ResponseBody ResponseEntity<String> getBestFinalPickPool(String opponentHero1, String opponentHero2, String opponentHero3, String opponentHero4, @RequestParam(value = "numHeroes", defaultValue = "10") int numHeroes) {
-        return new ResponseEntity<>(DotaMatchStatCollector.getInstance().getBestFinalPickPool(opponentHero1, opponentHero2, opponentHero3, opponentHero4, numHeroes), HttpStatus.OK);
+    public @ResponseBody ResponseEntity<String> getBestFinalPickPool(@RequestParam String op1, @RequestParam String op2, @RequestParam String op3, @RequestParam String op4, @RequestParam(value = "numHeroes", defaultValue = "10") int numHeroes) {
+        return new ResponseEntity<>(DotaMatchStatCollector.getInstance().getBestFinalPickPool(op1, op2, op3, op4, numHeroes), HttpStatus.OK);
     }
 
     @GetMapping("/getStatisticalAdvantageTeamScore")
-    public @ResponseBody ResponseEntity<Double> getStatisticalAdvantageTeamScore(String hero1, String hero2, String hero3, String hero4, String hero5, String op1, String op2, String op3, String op4, String op5) {
-        return new ResponseEntity<>(DotaMatchStatCollector.getInstance().getStatisticalAdvantageTeamScore(hero1, hero2, hero3, hero4, hero5, op1, op2, op3, op4, op5), HttpStatus.OK);
+    public @ResponseBody ResponseEntity<Double> getStatisticalAdvantageTeamScore(String h1, String h2, String h3, String h4, String h5, String op1, String op2, String op3, String op4, String op5) {
+        return new ResponseEntity<>(DotaMatchStatCollector.getInstance().getStatisticalAdvantageTeamScore(h1, h2, h3, h4, h5, op1, op2, op3, op4, op5), HttpStatus.OK);
     }
 }

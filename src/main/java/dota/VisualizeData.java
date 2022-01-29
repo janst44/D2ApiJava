@@ -28,7 +28,7 @@ public class VisualizeData {
 
         for (Map.Entry<String, SingleHeroStats> entry : top5Counters.entrySet()) {
             List<Map.Entry<String, WinLossTotals>> greatest = findGreatest(entry.getValue().getOpponents(), numCountersToGet);
-            SingleHeroStats singleHeroStats = new SingleHeroStats(entry.getValue());
+            SingleHeroStats singleHeroStats = new SingleHeroStats(entry.getKey(), entry.getValue());
             for (Map.Entry<String, WinLossTotals> oneOfTheGreatestCounters : greatest) {
                 singleHeroStats.setOpponentByString(oneOfTheGreatestCounters.getKey(), oneOfTheGreatestCounters.getValue());
             }

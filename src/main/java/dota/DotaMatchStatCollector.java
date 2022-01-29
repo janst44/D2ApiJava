@@ -48,7 +48,7 @@ public class DotaMatchStatCollector {
     public void startReadingFromAPI() throws Exception {
         String lastSequenceNumber;
         try {
-            lastSequenceNumber = getMostRecentSequenceNumber(); // pass prev offset each time
+            lastSequenceNumber = retryGetAndSetLastSeqNumber(); // pass prev offset each time
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -61,20 +61,7 @@ public class DotaMatchStatCollector {
                 matches = getMatchesJsonArray(lastSequenceNumber);
             } catch(Exception e) {
                 e.printStackTrace();
-                System.out.println("Getting most recent seq number to restart at in order to avoid continued errors");
-                lastSequenceNumber = "0";
-                while(lastSequenceNumber.equals("0")) {
-                    try{
-                        lastSequenceNumber = getMostRecentSequenceNumber();
-                    } catch (Exception ex) {
-                        e.printStackTrace();
-                        System.out.println("Upstream server error, waiting for 1 minute before retrying");
-                        for(int i =1; i < 7; i++){
-                            Thread.sleep(10000); // don't pound the server too fast even when error state
-                            System.out.println(i + "0");
-                        }
-                    }
-                }
+                lastSequenceNumber = retryGetAndSetLastSeqNumber();
                 continue;
             }
             saveCounter +=1;
@@ -99,6 +86,24 @@ public class DotaMatchStatCollector {
             }
             Thread.sleep(10000); // don't pound the server too fast
         }
+    }
+
+    private String retryGetAndSetLastSeqNumber() throws InterruptedException {
+        System.out.println("Getting most recent seq number to restart at in order to avoid continued errors");
+        String lastSequenceNumber = "0";
+        while(lastSequenceNumber.equals("0")) {
+            try{
+                lastSequenceNumber = getMostRecentSequenceNumber();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                System.out.println("Upstream server error, waiting for 1 minute before retrying");
+                for(int i =1; i < 7; i++){
+                    Thread.sleep(10000); // don't pound the server too fast even when error state
+                    System.out.println(i + "0");
+                }
+            }
+        }
+        return lastSequenceNumber;
     }
 
     private Map<String, String> getHeroNameMappings() throws Exception {
@@ -134,7 +139,7 @@ public class DotaMatchStatCollector {
         }
         JSONObject mostRecentGame = responseObj.getJSONObject("result");
         JSONArray matchesArray = mostRecentGame.getJSONArray("matches");
-        return matchesArray.getJSONObject(0).get("match_seq_num").toString();
+        return matchesArray.getJSONObject(0).get("match_seq_num").toString(); // empty json array error can't be handled so just retry
     }
 
     private JSONArray getMatchesJsonArray(String offsetSeqNumber) throws JSONException, IOException {
